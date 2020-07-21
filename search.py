@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -72,32 +72,98 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
 
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
+    Every path in a set of actions: next node, direction, and cost.
 
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
+    Variable path is used to maintain visited vertices, and is a set to
+    ensure that no vertex is visited twice.
+    Searching in a set is constant time as opposed to linear time in a list.
 
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    problem.getStartState() is set of coordinates on the x and y axis.
+    problem.isGoalState(problem.getStartState()) is a boolean to check if
+    the current state is the goal.
+    problem.getSuccessors(problem.getStartState()) is a set of next node,
+    direction, and cost.
+
+    Implementation returns a list of actions that reaches the goal.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stack_util = util.Stack()
+    path = set()
+    stack_util.push((problem.getStartState(), [], 1))
+
+    while stack_util:
+        next_node, direction, cost = stack_util.pop()    # unpacks problem.getStartState() to next_node
+
+        if next_node in path:
+            continue
+
+        path.add(next_node)
+
+        if problem.isGoalState(next_node):
+            return direction
+
+        for state, action, cost in problem.getSuccessors(next_node):
+            stack_util.push((state, direction+[action], cost))
+    return path
+
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """
+    Search the shallowest nodes in the search tree first.
+
+    Similar to the above implementation of DFS but a queue is used instead
+    of a stack.
+    """
+    queue_util = util.Queue()
+    path = set()
+    queue_util.push((problem.getStartState(), [], 1))
+
+    while queue_util:
+        next_node, direction, cost = queue_util.pop()
+
+        if next_node in path:
+            continue
+
+        path.add(next_node)
+
+        if problem.isGoalState(next_node):
+            return direction
+
+        for state, action, cost in problem.getSuccessors(next_node):
+            queue_util.push((state, direction+[action], cost))
+    return path
+
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """
+    Search the node of least total cost first.
+
+    Similar to the above implementation of BFS but a priority queue is used
+    instead of a queue.
+    """
+    priority_queue_util = util.PriorityQueue()
+    path = set()
+    priority_queue_util.push((problem.getStartState(), [], 1), 0)
+
+    while priority_queue_util:
+        next_node, direction, cost = priority_queue_util.pop()
+
+        if next_node in path:
+            continue
+
+        path.add(next_node)
+
+        if problem.isGoalState(next_node):
+            return direction
+
+        for state, action, cost in problem.getSuccessors(next_node):
+            priority_queue_util.push((state, direction+[action], cost), problem.getCostOfActions(direction+[action]))
+    return path
+
 
 def nullHeuristic(state, problem=None):
     """
