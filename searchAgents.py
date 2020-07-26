@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -288,10 +288,6 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.Corner1 = False
-        self.Corner2 = False
-        self.Corner3 = False
-        self.Corner4 = False
 
     def getStartState(self):
         """
@@ -299,7 +295,8 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startingPosition
+        start_state = (self.startingPosition, self.corners)
+        return start_state
 
     def isGoalState(self, state):
         """
@@ -345,7 +342,7 @@ class CornersProblem(search.SearchProblem):
                 self.Corner3 = state[1][2]
                 self.Corner4 = state[1][3]
 
-            x,y = currentPosition
+            x,y = self.startingPosition
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
@@ -360,7 +357,7 @@ class CornersProblem(search.SearchProblem):
                 if (current_position == self.corners[3]):
                     self.Corner4 = True
                 next_state = (current_position,(self.Corner1,self.Corner2,self.Corner3,self.Corner4))
-                successor.append(next_state, action, cost)
+                successors.append((next_state, action, cost))
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -486,10 +483,18 @@ def foodHeuristic(state, problem):
     value, try: problem.heuristicInfo['wallCount'] = problem.walls.count()
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
+
+    Using maze distance function (which uses BFS) for food heuristic
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    food_coordicates = foodGrid.asList()
+    
+    heuristic = [0]
+    for point in food_coordicates:
+        heuristic.append(mazeDistance(position,point,problem.startingGameState))
+
+    return max(heuristic)
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -519,8 +524,8 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.bfs(problem)
+        
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -554,9 +559,8 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
+        return state in self.food.asList()
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
     """
