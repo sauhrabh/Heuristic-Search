@@ -79,9 +79,8 @@ def depthFirstSearch(problem):
 
     Every path in a set of actions: next node, direction, and cost.
 
-    Variable path is used to maintain visited vertices, and is a set to
-    ensure that no vertex is visited twice.
-    Searching in a set is constant time as opposed to linear time in a list.
+    Variable path is used to maintain visited vertices, and is a list to
+    ensure no errors like "TypeError: unhashable type: 'list'"
 
     problem.getStartState() is set of coordinates on the x and y axis.
     problem.isGoalState(problem.getStartState()) is a boolean to check if
@@ -92,7 +91,7 @@ def depthFirstSearch(problem):
     Implementation returns a list of actions that reaches the goal.
     """
     stack_util = util.Stack()
-    path = set()
+    path = []
     stack_util.push((problem.getStartState(), [], 1))
 
     while stack_util:
@@ -101,7 +100,7 @@ def depthFirstSearch(problem):
         if next_node in path:
             continue
 
-        path.add(next_node)
+        path.append(next_node)
 
         if problem.isGoalState(next_node):
             return direction
@@ -119,7 +118,7 @@ def breadthFirstSearch(problem):
     of a stack.
     """
     queue_util = util.Queue()
-    path = set()
+    path = []
     queue_util.push((problem.getStartState(), [], 1))
 
     while queue_util:
@@ -128,7 +127,7 @@ def breadthFirstSearch(problem):
         if next_node in path:
             continue
 
-        path.add(next_node)
+        path.append(next_node)
 
         if problem.isGoalState(next_node):
             return direction
@@ -146,7 +145,7 @@ def uniformCostSearch(problem):
     instead of a queue.
     """
     priority_queue_util = util.PriorityQueue()
-    path = set()
+    path = []
     priority_queue_util.push((problem.getStartState(), [], 1), 0)
 
     while priority_queue_util:
@@ -155,13 +154,14 @@ def uniformCostSearch(problem):
         if next_node in path:
             continue
 
-        path.add(next_node)
+        path.append(next_node)
 
         if problem.isGoalState(next_node):
             return direction
 
         for state, action, cost in problem.getSuccessors(next_node):
-            priority_queue_util.push((state, direction+[action], cost), problem.getCostOfActions(direction+[action]))
+            priority_queue_util.push((state, direction+[action], cost), \
+            problem.getCostOfActions(direction+[action]))
     return path
 
 
@@ -172,33 +172,28 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
+    priority_queue_util = util.PriorityQueue()
+    path = []
+    priority_queue_util.push((problem.getStartState(), [], 1), 0)
 
-    aOpen = util.PriorityQueue()
-    aClosed = set()
-    
-    start = problem.getStartState()
-    if problem.isGoalState(start):
-        return start
-    
-    aOpen.push((start, [], 0), heuristic(start, problem))
+    while priority_queue_util:
+        next_node, direction, cost = priority_queue_util.pop()
 
-    while aOpen:
-        node, direction, cost = aOpen.pop()
-
-        if node in aClosed:
+        if next_node in path:
             continue
 
-        aClosed.add(node)
+        path.append(next_node)
 
-        if problem.isGoalState(node):
+        if problem.isGoalState(next_node):
             return direction
 
-        for state, action, cost in problem.getSuccessors(node):
-            aOpen.push((state, direction + [action], cost), problem.getCostOfActions(direction + [action]) + heuristic(state, problem))
-
-    return aClosed
+        for state, action, cost in problem.getSuccessors(next_node):
+            priority_queue_util.push((state, direction+[action], cost), \
+            problem.getCostOfActions(direction+[action]) + heuristic(state, problem))
+    return path
 
 
 # Abbreviations
